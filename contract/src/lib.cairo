@@ -11,22 +11,41 @@ pub trait IHelloStarknet<TContractState> {
 /// Simple contract for managing balance.
 #[starknet::contract]
 mod HelloStarknet {
+    use starknet::ContractAddress;
+    
     use core::starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess};
+
+    use core::starknet::get_block_timestamp;
+
+    use starknet::storage::Map;
+
+    struct Contest {
+        id: felt252,
+        start_time: u64,
+        end_time: u64,
+        price: felt252,
+    }
 
     #[storage]
     struct Storage {
-        balance: felt252,
+        last_contest_id: u32,
+        contests: Map<u32, Contest>,
+        tickets: Map<(u32, u32), ContractAddress>,
     }
 
     #[abi(embed_v0)]
     impl HelloStarknetImpl of super::IHelloStarknet<ContractState> {
         fn increase_balance(ref self: ContractState, amount: felt252) {
             assert(amount != 0, 'Amount cannot be 0');
-            self.balance.write(self.balance.read() + amount);
+            // self.balance.write(self.balance.read() + amount);
         }
 
         fn get_balance(self: @ContractState) -> felt252 {
-            self.balance.read()
+            // self.balance.read()
+            0
         }
+
+        // fn buy_ticket(ref self: ContractState)
+
     }
 }
