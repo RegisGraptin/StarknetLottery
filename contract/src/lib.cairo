@@ -1,9 +1,4 @@
 
-// TODO: HELPER: https://agent.starknet.id/
-
-use starknet::ContractAddress;
-
-
 #[starknet::interface]
 pub trait ILotteryStarknet<TContractState> {
 
