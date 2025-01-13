@@ -6,6 +6,10 @@
 > Design a lottery system where entry fees are pooled and prizes are distributed onchain.
 
 
+SethLottery
+Inspiration: Set (Seth), the god of chaos and disorder, embodies unpredictability—perfect for a game of chance like a lottery. "SetSpin" could highlight the chaotic nature of chance and fortune, where anything can happen.
+Design Ideas: Use darker tones, reds, and blacks to symbolize Set’s association with chaos and turmoil. The logo could feature a spinning wheel or an abstract depiction of chaos, giving it an edgy, modern vibe.
+
 
 # Architecture 
 
