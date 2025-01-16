@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import './App.css'
 
 
-import { ArgentTMA, SessionAccountInterface } from '@argent/tma-wallet'
+import { SessionAccountInterface } from '@argent/tma-wallet'
 import LotteryGrid from './components/Lottery';
 
 // // FIXME: create lib file
@@ -26,7 +26,7 @@ function App() {
 
 
   const [account, setAccount] = useState<SessionAccountInterface | undefined>();
-  const [isConnected, setIsConnected] = useState<boolean>(true);
+  const [isConnected, _setIsConnected] = useState<boolean>(true);
 
 
   // useEffect(() => {
