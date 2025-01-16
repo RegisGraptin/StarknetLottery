@@ -2,8 +2,11 @@ import { useState } from 'react'
 import './App.css'
 
 
+
 import { SessionAccountInterface } from '@argent/tma-wallet'
 import LotteryGrid from './components/Lottery';
+import { isTMA } from '@telegram-apps/sdk';
+import Home from './pages/Home';
 
 // // FIXME: create lib file
 // const argentTMA = ArgentTMA.init({
@@ -25,8 +28,10 @@ import LotteryGrid from './components/Lottery';
 function App() {
 
 
+  
+
   const [account, setAccount] = useState<SessionAccountInterface | undefined>();
-  const [isConnected, _setIsConnected] = useState<boolean>(true);
+  const [isConnected, _setIsConnected] = useState<boolean>(false);
 
 
   // useEffect(() => {
@@ -71,6 +76,17 @@ function App() {
   // }, []);
 
   const handleConnectButton = async () => {
+
+    console.log("Here we go!")
+
+    if (await isTMA()) {
+      // TODO:: Use argent wallet for telegram version
+
+    } else {
+      // Use browser wallet
+
+    }
+
     // If not connected, trigger a connection request
     // It will open the wallet and ask the user to approve the connection
     // The wallet will redirect back to the app and the account will be available
@@ -87,9 +103,14 @@ function App() {
   console.log(account)
   
 
+  // 1. Home Page
+
   return (
-    <div className="h-auto">
-        
+    <div className="h-auto w-96">
+
+      {!isConnected && <Home handleConnectButton={handleConnectButton} />}
+      
+
       <div className="p-4">
         
         {isConnected && (
@@ -108,18 +129,6 @@ function App() {
           <LotteryGrid />
           </div>
         )}
-      </div>
-        {/* outlet */}
-      <div className="grid grid-cols-1">
-        {/* {isConnected && <Game context={account}/>} */}
-
-        
-        {!isConnected && <h1>You need to login</h1>}
-        {!isConnected && <button className="py-2 px-4 rounded-lg bg-slate-300 text-gray-700" onClick={handleConnectButton}>Connect</button>}
-
-
-
-
       </div>
     </div>
   );
