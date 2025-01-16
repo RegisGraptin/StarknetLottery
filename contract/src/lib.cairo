@@ -4,7 +4,6 @@ use alexandria_sorting::BubbleSort;
 
 use starknet::ContractAddress;
 
-
 use core::poseidon::PoseidonTrait;
 use core::hash::{HashStateTrait, HashStateExTrait};
 
@@ -19,7 +18,7 @@ struct Ticket {
 
 
 trait TicketTrait {
-    /// We should have 5 different number ordered and contain between [1;49]
+    /// We should have 5 different number ordered and contain between [1;50]
     fn verify(self: @Ticket) -> bool;
 }
 
@@ -32,7 +31,7 @@ impl TicketImpl of TicketTrait {
             && self.num2 < self.num3
             && self.num3 < self.num4
             && self.num4 < self.num5
-            && self.num5 < @50
+            && self.num5 < @51
         );
     }
 }
@@ -47,8 +46,8 @@ fn random_ticket(seed: felt252) -> Ticket {
         random_seed = random_seed + 1;
         let hash = PoseidonTrait::new().update_with(random_seed).finalize();
         
-        // Number should be between [1;49]
-        let reduce_number: u256 = hash.into() % 49;
+        // Number should be between [1;50]
+        let reduce_number: u256 = hash.into() % 50;
         let ticket_number: u8 = reduce_number.try_into().unwrap() + 1;
 
         // Check if the number is unique
