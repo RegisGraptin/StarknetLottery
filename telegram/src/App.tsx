@@ -1,10 +1,7 @@
 import { useState } from "react";
 import "./App.css";
-
 import { connect, disconnect, StarknetWindowObject } from "starknetkit";
 
-import { SessionAccountInterface } from "@argent/tma-wallet";
-import LotteryGrid from "./components/Lottery";
 import { isTMA } from "@telegram-apps/sdk";
 import Home from "./pages/Home";
 import Game from "./pages/Game";
@@ -28,7 +25,7 @@ import Game from "./pages/Game";
 
 function App() {
   const [address, setAddress] = useState<string>("");
-  const [connection, setConnection] = useState<StarknetWindowObject>();
+  const [_connection, setConnection] = useState<StarknetWindowObject>();
   const [isConnected, setIsConnected] = useState<boolean>(false);
 
   // useEffect(() => {
@@ -103,11 +100,12 @@ function App() {
 
   // // useful for debugging
   const handleClearSessionButton = async () => {
-    // if (await isTMA()) {
-    //   // TODO:: Use argent wallet for telegram version
-    //   // await argentTMA.clearSession();
-    // } else {
-    // }
+    if (await isTMA()) {
+      // TODO:: Use argent wallet for telegram version
+      // await argentTMA.clearSession();
+    } else {
+      await disconnect();
+    }
     setConnection(undefined);
     setAddress("");
     setIsConnected(false);

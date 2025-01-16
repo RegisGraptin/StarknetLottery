@@ -1,4 +1,3 @@
-import { isTMA } from "@telegram-apps/sdk";
 import { useState } from "react";
 
 export default function LotteryGrid() {
@@ -31,7 +30,6 @@ export default function LotteryGrid() {
 
   const sumbitNumbers = async () => {
     console.log("test");
-    
   };
 
   return (
