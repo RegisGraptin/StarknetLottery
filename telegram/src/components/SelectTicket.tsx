@@ -1,18 +1,18 @@
-import { useCall } from "@starknet-react/core";
+// import { useCall } from "@starknet-react/core";
 
-import LotteryStarknetContract from "../abi/contract_LotteryStarknet.contract_class.json";
+// import LotteryStarknetContract from "../abi/contract_LotteryStarknet.contract_class.json";
 
 export default function SelectTicket({ ticket }: { ticket: Ticket }) {
-  const LOTTERY_CONTRACT_ADDRESS =
-    "0x058ec50072f4cb7587809f2c18cc216ca2c706f22d165128a0c1ca0e22175049";
+  // const LOTTERY_CONTRACT_ADDRESS =
+  //   "0x058ec50072f4cb7587809f2c18cc216ca2c706f22d165128a0c1ca0e22175049";
 
-  const { data } = useCall({
-    abi: LotteryStarknetContract.abi,
-    address: LOTTERY_CONTRACT_ADDRESS,
-    functionName: "last_contest_id",
-  });
+  // const { data } = useCall({
+  //   abi: LotteryStarknetContract.abi,
+  //   address: LOTTERY_CONTRACT_ADDRESS,
+  //   functionName: "last_contest_id",
+  // });
 
-  console.log(data);
+  // console.log(data);
 
   const numbers = [
     ticket.num1,
