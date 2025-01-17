@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import { useEffect, useState } from "react";
 import "./App.css";
 import {
@@ -23,6 +21,7 @@ import {} from "@starknet-react/core";
 import LotteryStarknetContract from "./abi/contract_LotteryStarknet.contract_class.json";
 import StarknetToken from "./abi/erc20_abi.json";
 import { ArgentTMA } from "@argent/tma-wallet";
+import Select from "./pages/Select";
 
 function App() {
   const { connect, connectors } = useConnect();
@@ -52,7 +51,7 @@ function App() {
     address: LOTTERY_CONTRACT_ADDRESS,
   });
 
-  const { send } = useSendTransaction({
+  const { sendAsync, isSuccess } = useSendTransaction({
     calls:
       contract && starknetTokenContract && ticket
         ? [
@@ -77,8 +76,14 @@ function App() {
     if (ticket === undefined) {
       return;
     }
-    send();
-    setTicket(undefined);
+
+    async function sendTicketTransaction() {
+      await sendAsync();
+      // setTicket(undefined);
+      console.log(isSuccess);
+    }
+
+    sendTicketTransaction();
   }, [ticket]);
 
   const handleConnectButton = async () => {
@@ -133,11 +138,22 @@ function App() {
     <div className="h-auto w-96">
       {!isConnected && <Home handleConnectButton={handleConnectButton} />}
       {isConnected && address && (
-        <Game
-          address={address}
-          handleClearSessionButton={handleClearSessionButton}
-          submitLotteryTicket={submitLotteryTicket}
-        />
+        <>
+          {isSuccess && (
+            <Select
+              address={address}
+              handleClearSessionButton={handleClearSessionButton}
+              ticket={ticket!}
+            />
+          )}
+          {!isSuccess && (
+            <Game
+              address={address}
+              handleClearSessionButton={handleClearSessionButton}
+              submitLotteryTicket={submitLotteryTicket}
+            />
+          )}
+        </>
       )}
     </div>
   );
