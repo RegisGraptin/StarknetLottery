@@ -1,125 +1,142 @@
-import { useState } from "react";
+// @ts-nocheck
+
+import { useEffect, useState } from "react";
 import "./App.css";
-import { connect, disconnect, StarknetWindowObject } from "starknetkit";
+import {
+  disconnect,
+  StarknetkitConnector,
+  useStarknetkitConnectModal,
+} from "starknetkit";
 
 import { isTMA } from "@telegram-apps/sdk";
 import Home from "./pages/Home";
 import Game from "./pages/Game";
+import {
+  useAccount,
+  useConnect,
+  useContract,
+  useSendTransaction,
+} from "@starknet-react/core";
 
-// // FIXME: create lib file
-// const argentTMA = ArgentTMA.init({
-//   environment: "sepolia",
-//   appName: "SethLottery",
-//   appTelegramUrl: import.meta.env.VITE_TELEGRAM_URL,
-//   sessionParams: {
-//     allowedMethods: [
-//       // List of contracts/methods allowed to be called by the session key
-//       // {
-//       //   contract: "contracts address",
-//       //   selector: "function name",
-//       // }
-//     ],
-//     validityDays: 90 // session validity (in days) - default: 90
-//   },
-// });
+import {} from "@starknet-react/core";
+
+import LotteryStarknetContract from "./abi/contract_LotteryStarknet.contract_class.json";
+import StarknetToken from "./abi/erc20_abi.json";
+import { ArgentTMA } from "@argent/tma-wallet";
 
 function App() {
-  const [address, setAddress] = useState<string>("");
-  const [_connection, setConnection] = useState<StarknetWindowObject>();
+  const { connect, connectors } = useConnect();
+  const { starknetkitConnectModal } = useStarknetkitConnectModal({
+    connectors: connectors as StarknetkitConnector[],
+  });
+  const { address, status } = useAccount();
+
+  const [argentTMA, setArgentTMA] = useState<ArgentTMA | undefined>(undefined);
+
   const [isConnected, setIsConnected] = useState<boolean>(false);
+  const [ticket, setTicket] = useState<Ticket>();
 
-  // useEffect(() => {
+  const STARKNET_TOKEN_ADDRESS =
+    "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d";
 
-  // Call connect() as soon as the app is loaded
-  //   argentTMA
-  //     .connect()
-  //     .then((res) => {
-  //       if (!res) {
-  //         // Not connected
-  //         setIsConnected(false);
-  //         return;
-  //       }
+  const LOTTERY_CONTRACT_ADDRESS =
+    "0x058ec50072f4cb7587809f2c18cc216ca2c706f22d165128a0c1ca0e22175049";
 
-  //       // Connected
-  //       const { account, callbackData } = res;
+  const { contract: starknetTokenContract } = useContract({
+    abi: StarknetToken,
+    address: STARKNET_TOKEN_ADDRESS,
+  });
 
-  //       if (account.getSessionStatus() !== "VALID") {
-  //         // Session has expired or scope (allowed methods) has changed
-  //         // A new connection request should be triggered
+  const { contract } = useContract({
+    abi: LotteryStarknetContract.abi,
+    address: LOTTERY_CONTRACT_ADDRESS,
+  });
 
-  //         // The account object is still available to get access to user's address
-  //         // but transactions can't be executed
-  //         const { account } = res;
+  const { send } = useSendTransaction({
+    calls:
+      contract && starknetTokenContract && ticket
+        ? [
+            starknetTokenContract.populate("approve", [
+              LOTTERY_CONTRACT_ADDRESS,
+              10,
+            ]),
+            contract.populate("buy_ticket", [ticket]),
+          ]
+        : undefined,
+  });
 
-  //         setAccount(account);
-  //         setIsConnected(false);
-  //         return;
-  //       }
+  useEffect(() => {
+    if (status === "disconnected") {
+      setIsConnected(false);
+    } else if (status === "connected") {
+      setIsConnected(true);
+    }
+  }, [address, status]);
 
-  //       // Connected
-  //       // const { account, callbackData } = res;
-  //       // The session account is returned and can be used to submit transactions
-  //       setAccount(account);
-  //       setIsConnected(true);
-  //       // Custom data passed to the requestConnection() method is available here
-  //       console.log("callback data:", callbackData);
-  //     })
-  //     .catch((err) => {
-  //       console.error("Failed to connect", err);
-  //     });
-  // }, []);
+  useEffect(() => {
+    if (ticket === undefined) {
+      return;
+    }
+    send();
+    setTicket(undefined);
+  }, [ticket]);
 
   const handleConnectButton = async () => {
-    console.log("Here we go!");
-
     if (await isTMA()) {
       // TODO:: Use argent wallet for telegram version
+      if (argentTMA === undefined) {
+        setArgentTMA(
+          ArgentTMA.init({
+            environment: "sepolia",
+            appName: "SethLottery",
+            appTelegramUrl: import.meta.env.VITE_TELEGRAM_URL,
+            sessionParams: {
+              allowedMethods: [
+                // List of contracts/methods allowed to be called by the session key
+                // {
+                //   contract: "contracts address",
+                //   selector: "function name",
+                // }
+              ],
+              validityDays: 90, // session validity (in days) - default: 90
+            },
+          }),
+        );
+      }
+      await argentTMA?.connect();
     } else {
       // Use browser wallet
-      const { wallet, connectorData } = await connect({
-        webWalletUrl: "https://web.argent.xyz",
-        argentMobileOptions: {
-          dappName: "test",
-          url: "https://test.com",
-        },
-      });
-
-      if (wallet && connectorData) {
-        setConnection(wallet);
-        setAddress(connectorData.account!);
-        setIsConnected(true);
+      const { connector } = await starknetkitConnectModal();
+      if (!connector) {
+        return;
       }
+      await connect({ connector });
     }
-
-    // If not connected, trigger a connection request
-    // It will open the wallet and ask the user to approve the connection
-    // The wallet will redirect back to the app and the account will be available
-    // from the connect() method -- see above
-    // await argentTMA.requestConnection({});
   };
 
   // // useful for debugging
   const handleClearSessionButton = async () => {
     if (await isTMA()) {
-      // TODO:: Use argent wallet for telegram version
-      // await argentTMA.clearSession();
+      // Use argent wallet for telegram version
+      await argentTMA?.clearSession();
     } else {
+      setIsConnected(false);
       await disconnect();
     }
-    setConnection(undefined);
-    setAddress("");
-    setIsConnected(false);
   };
 
-  // 1. Home Page
-
+  const submitLotteryTicket = async (ticket: Ticket) => {
+    console.log(ticket);
+    setTicket(ticket);
+  };
   return (
     <div className="h-auto w-96">
       {!isConnected && <Home handleConnectButton={handleConnectButton} />}
-      {isConnected && (
+      {isConnected && address && (
         <Game
           address={address}
           handleClearSessionButton={handleClearSessionButton}
+          submitLotteryTicket={submitLotteryTicket}
         />
       )}
     </div>
