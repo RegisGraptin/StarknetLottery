@@ -1,38 +1,43 @@
-# On chain lottery on Starknet
-> Built for 'Starknet Winter Hackathon'
-> https://app.buidlbox.io/starknet/starknet-winter
+<a id="readme-top"></a>
+
+<!-- PROJECT LOGO -->
+<br />
+<div align="center">
+  <a href="https://github.com/RegisGraptin/StarknetLottery">
+    <img src="./egyptian_god.svg" alt="Logo" width="250" height="250">
+  </a>
+
+<h3 align="center">Seth Lottery</h3>
+<p align="center" style="font-style: italic; font-size: 1.2em;">Built for <a href="https://app.buidlbox.io/starknet/starknet-winter">Starknet Winter Hackathon</a></p>
+  <p align="center">
+    A decentralized lottery game developed in Cairo.
+    <br />
+    <br />
+    <a href="https://github.com/RegisGraptin/StarknetLottery">View Demo</a>
+  </p>
+</div>
 
 
-> Design a lottery system where entry fees are pooled and prizes are distributed onchain.
+## About The Project
+
+**Seth Lottery** is a decentralized lottery game developed using Cairo during the *Starknet Winter Hackathon*. The game allows players to enter in the Seth world where Chaos and Randomness reign supreme. To participate, players will have to choose 5 unique numbers, crafting their ticket to challenge the forces of chance.
+
+The dApp is primarily designed for use on Telegram. However, due to potential stability issues, we recommend accessing it through a web browser for the best experience. The application is fully optimized for both platforms.
+
+During each "contest," a unique set of numbers can only be used once, ensuring a unique potential winner. To maintain a transparent and equitable gaming experience, the lottery relies on Pragma Oracle in order to generate a random numbers.
+
+After a lottery is completed, a new one can be initiated. Please note that tickets from previous lotteries are not carried over to subsequent contests.
+
+## Getting Started
+
+In this project, we will have two folders:
+
+- `contract`: Starknet smart contract code.
+- `telegram`: Telegram Mini app implementation.
 
 
-SethLottery
-Inspiration: Set (Seth), the god of chaos and disorder, embodies unpredictability—perfect for a game of chance like a lottery. "SetSpin" could highlight the chaotic nature of chance and fortune, where anything can happen.
-Design Ideas: Use darker tones, reds, and blacks to symbolize Set’s association with chaos and turmoil. The logo could feature a spinning wheel or an abstract depiction of chaos, giving it an edgy, modern vibe.
+## Contract
 
 
-# Architecture 
+A smart contract have been deployed on starknet of sepolia. You can find it at this address: `0x058ec50072f4cb7587809f2c18cc216ca2c706f22d165128a0c1ca0e22175049`.
 
-State
-- Contest [list contest c1,c2,...]
-- Last contest id
-
-
-Contest
-- id
-- start_time
-- end_time
-- tickets (mapping (ticket_id --> user) )
-- price
-
-
-ticket_id = [n1,n2,n3,n4,n5] with ni € [1;49]
-
-
--- functions
-
-- create contest
-- join contest 
-- endContest
-
-// TODO: HELPER: https://agent.starknet.id/

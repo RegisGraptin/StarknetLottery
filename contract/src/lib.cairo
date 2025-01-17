@@ -8,7 +8,7 @@ use core::poseidon::PoseidonTrait;
 use core::hash::{HashStateTrait, HashStateExTrait};
 
 #[derive(Copy, Drop, Serde, starknet::Store, Hash)]
-struct Ticket {
+pub struct Ticket {
     pub num1: u8,
     pub num2: u8, 
     pub num3: u8, 

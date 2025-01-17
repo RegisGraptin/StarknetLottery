@@ -4,6 +4,8 @@ use starknet::{contract_address_const};
 
 use snforge_std::{declare, ContractClassTrait, DeclareResultTrait};
 
+use contract::Ticket;
+
 use contract::ILotteryStarknetSafeDispatcher;
 use contract::ILotteryStarknetSafeDispatcherTrait;
 // use contract::ILotteryStarknetDispatcher;
@@ -25,6 +27,16 @@ fn test_deploy_and_create_contest() {
 
     let dispatcher = ILotteryStarknetSafeDispatcher { contract_address };
     let _ = dispatcher.create_new_contest(1738368000);
+
+    let ticket = Ticket {
+        num1: 1,
+        num2: 2,
+        num3: 12,
+        num4: 16,
+        num5: 18
+    };
+
+    let _ = dispatcher.buy_ticket(ticket);
 }
 
 // #[test]
