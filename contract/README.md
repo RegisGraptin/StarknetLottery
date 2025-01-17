@@ -32,12 +32,8 @@ Contract deployed:
 
 
 
-starkli invoke --account account.json --keystore keystore.json \
+starkli invoke --account account.json --keystore keystore.json --network=sepolia \
     0x058ec50072f4cb7587809f2c18cc216ca2c706f22d165128a0c1ca0e22175049 \
-    create_new_contest \
-    1738368000 \
-    --network=sepolia
-
-
+    create_new_contest 1738368000
 
 1738368000 - Saturday 1 February 2025 00:00:00
