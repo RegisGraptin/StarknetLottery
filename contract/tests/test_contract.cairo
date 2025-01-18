@@ -5,38 +5,58 @@ use starknet::{contract_address_const};
 use snforge_std::{declare, ContractClassTrait, DeclareResultTrait};
 
 use contract::Ticket;
+use contract::random_ticket;
 
-use contract::ILotteryStarknetSafeDispatcher;
-use contract::ILotteryStarknetSafeDispatcherTrait;
-// use contract::ILotteryStarknetDispatcher;
-// use contract::ILotteryStarknetDispatcherTrait;
+// use contract::ILotteryStarknetSafeDispatcher;
+// use contract::ILotteryStarknetSafeDispatcherTrait;
+use contract::ILotteryStarknetDispatcher;
+use contract::ILotteryStarknetDispatcherTrait;
 
-fn deploy_contract(name: ByteArray, owner: ContractAddress) -> ContractAddress {
+fn deploy_contract(name: ByteArray) -> (ILotteryStarknetDispatcher, ContractAddress) {
     let contract = declare(name).unwrap().contract_class();
-    let mut params = ArrayTrait::new();
-    params.append(owner.into());
 
-    let (contract_address, _) = contract.deploy(@params).unwrap();
-    contract_address
+    let owner: ContractAddress = contract_address_const::<'owner'>();
+    let constructor_calldata = array![owner.into()];
+
+    let (contract_address, _) = contract.deploy(@constructor_calldata).unwrap();
+    
+    let dispatcher = ILotteryStarknetDispatcher { contract_address };
+
+    (dispatcher, contract_address)
 }
 
 #[test]
 fn test_deploy_and_create_contest() {
-    let owner = contract_address_const::<'owner'>();
-    let contract_address = deploy_contract("LotteryStarknet", owner);
+    let (dispatcher, _contract_address) = deploy_contract("LotteryStarknet");
 
-    let dispatcher = ILotteryStarknetSafeDispatcher { contract_address };
     let _ = dispatcher.create_new_contest(1738368000);
+    // let ticket = Ticket {
+    //     num1: 1,
+    //     num2: 2,
+    //     num3: 12,
+    //     num4: 16,
+    //     num5: 18
+    // };
 
-    let ticket = Ticket {
-        num1: 1,
-        num2: 2,
-        num3: 12,
-        num4: 16,
-        num5: 18
+    // let _ = dispatcher.buy_ticket(ticket);
+}
+
+
+#[test]
+fn test_generate_random_ticket() {
+    let seed = 18;
+
+    let random_ticket: Ticket = random_ticket(seed);
+    let expected_ticket = Ticket {
+        num1: 4,
+        num2: 13,
+        num3: 20,
+        num4: 39,
+        num5: 43
     };
 
-    let _ = dispatcher.buy_ticket(ticket);
+    // println!("{} - {} - {} - {} - {}", random_ticket.num1, random_ticket.num2, random_ticket.num3, random_ticket.num4, random_ticket.num5);
+    assert(random_ticket == expected_ticket, 'Not expected ticket');
 }
 
 // #[test]

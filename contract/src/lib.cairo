@@ -7,7 +7,7 @@ use starknet::ContractAddress;
 use core::poseidon::PoseidonTrait;
 use core::hash::{HashStateTrait, HashStateExTrait};
 
-#[derive(Copy, Drop, Serde, starknet::Store, Hash)]
+#[derive(Copy, Drop, Serde, starknet::Store, Hash, PartialEq)]
 pub struct Ticket {
     pub num1: u8,
     pub num2: u8, 
@@ -37,7 +37,8 @@ impl TicketImpl of TicketTrait {
 }
 
 
-fn random_ticket(seed: felt252) -> Ticket {
+pub fn random_ticket(seed: felt252) -> Ticket {
+    /// Generate a random ticket based on a seed
 
     let mut numbers: Array<u8> = ArrayTrait::new();
     let mut random_seed = seed;
@@ -79,8 +80,7 @@ pub trait ILotteryStarknet<TContractState> {
     fn buy_ticket(ref self: TContractState, user_ticket: Ticket);
 
     /// Terminate the contest and distribute prize 
-    fn end_contest(ref self: TContractState);
-
+    fn end_contest(ref self: TContractState, seed: u64, callback_fee_limit: u128, publish_delay: u64);
 
     /// Callback for getting a random number from Pragma Oracle
     fn randomness_callback(
@@ -176,13 +176,10 @@ mod LotteryStarknet {
 
 
         fn create_new_contest(ref self: ContractState, end_time_contest: u64) {
-
-            // Let's say the end push the id+1
-            // Meaning that each time the end time is not defined
-            // We have successfuly push to the next id
-            // If not, meaning we are still in the contest or waiting to call the end contest
-
-
+            /// We can create a new contest onyl when the last one is finished
+            /// For that, we can use the last contest id.
+            /// When the contest is finished, we increment it, meaning we are
+            /// reseting the last end time. 
 
             // Check if the previous contest is finished
             let lastToken: u32 = self.last_contest_id.read();
@@ -214,7 +211,6 @@ mod LotteryStarknet {
             let ticket_price = current_contest.price;
 
             // Check the ticket is still available
-            // FIXME: change variable name
             let ticket = self.tickets.read((contest_id, user_ticket));
             assert(ticket == contract_address_const::<0>(), Errors::TICKET_ALREADY_BOUGHT);
 
@@ -229,21 +225,14 @@ mod LotteryStarknet {
             self.tickets.write((contest_id, user_ticket), get_caller_address());
         }
 
-
-        // pub const PUBLISH_DELAY: u64 = 1; // return the random value asap
-        // pub const NUM_OF_WORDS: u64 = 1; // one random value is sufficient
-        // pub const CALLBACK_FEE_LIMIT: u128 = 100_000_000_000_000; // 0.0001 ETH
-        // pub const MAX_CALLBACK_FEE_DEPOSIT: u256 =
-        //     500_000_000_000_000; // CALLBACK_FEE_LIMIT * 5; needs to cover the Premium fee
-    
-
-        fn end_contest(ref self: ContractState){
-
-            // FIXME:
-            let seed: u64 = 100;
-            let callback_fee_limit = 100;
-            let publish_delay: u64 = 10;
-            let num_words: u64 = 5;
+        fn end_contest(
+            ref self: ContractState,
+            seed: u64,
+            callback_fee_limit: u128,
+            publish_delay: u64
+        ){
+            
+            let num_words: u64 = 1;
             let calldata: Array<felt252> = ArrayTrait::new();
 
 
@@ -279,9 +268,8 @@ mod LotteryStarknet {
             calldata: Array<felt252>
         ) {
             // Check that the contest is not already finished
-            // FIXME: change variable name 
-            let lastToken: u32 = self.last_contest_id.read();
-            let last_contest: Contest = self.contests.read(lastToken);
+            let last_contest_id: u32 = self.last_contest_id.read();
+            let last_contest: Contest = self.contests.read(last_contest_id);
             assert(last_contest.end_time != 0, Errors::ALREADY_FINISHED_CONTEST);
 
             // Check that the contest is finished
@@ -303,7 +291,7 @@ mod LotteryStarknet {
             let chosen_ticket = random_ticket(*random_words.at(0));
 
             // Check if this ticket is own by someone
-            let winner_address = self.tickets.read((lastToken, chosen_ticket));
+            let winner_address = self.tickets.read((last_contest_id, chosen_ticket));
 
             // Check if we have a winner!
             if winner_address != contract_address_const::<0>() {
